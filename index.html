@@ -165,27 +165,23 @@
             var popupContent = '<table>\
                     <tr>\
                         <th scope="row">Kecamatan</th>\
-                        <td class="visible-with-data" id="Kecamatan">' + (feature.properties['Kecamatan'] !== null ? autolinker.link(String(feature.properties['Kecamatan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">tahun</th>\
-                        <td class="visible-with-data" id="tahun">' + (feature.properties['tahun'] !== null ? autolinker.link(String(feature.properties['tahun']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                        <td>' + (feature.properties['Kecamatan'] !== null ? autolinker.link(String(feature.properties['Kecamatan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">jumlah_pen</th>\
-                        <td class="visible-with-data" id="jumlah_pen">' + (feature.properties['jumlah_pen'] !== null ? autolinker.link(String(feature.properties['jumlah_pen']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                        <td>' + (feature.properties['jumlah_pen'] !== null ? autolinker.link(String(feature.properties['jumlah_pen']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">kepadatan_</th>\
-                        <td class="visible-with-data" id="kepadatan_">' + (feature.properties['kepadatan_'] !== null ? autolinker.link(String(feature.properties['kepadatan_']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                        <td>' + (feature.properties['kepadatan_'] !== null ? autolinker.link(String(feature.properties['kepadatan_']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">sex_ratio</th>\
-                        <td class="visible-with-data" id="sex_ratio">' + (feature.properties['sex_ratio'] !== null ? autolinker.link(String(feature.properties['sex_ratio']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                        <td>' + (feature.properties['sex_ratio'] !== null ? autolinker.link(String(feature.properties['sex_ratio']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">Laju_pert2</th>\
-                        <td class="visible-with-data" id="Laju_pert2">' + (feature.properties['Laju_pert2'] !== null ? autolinker.link(String(feature.properties['Laju_pert2']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                        <td>' + (feature.properties['Laju_pert2'] !== null ? autolinker.link(String(feature.properties['Laju_pert2']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);

@@ -153,17 +153,15 @@
         <script src="./resources/Autolinker.min.js"></script>
         <script src="./resources/qgis2web.js"></script>        
 
-        <!-- SCRIPT KHUSUS: Kunci Rotasi, Hapus Atribut, Loading, & PERBAIKAN KLIK HP -->
+        <!-- SCRIPT KHUSUS PERBAIKAN TOTAL LAYAR HP -->
         <script>
             function applyMapSettings() {
                 if (typeof map !== 'undefined') {
-                    // 1. Kunci agar peta tidak bisa diputar (Selalu mengarah ke Utara)
+                    // Kunci rotasi
                     var view = map.getView();
-                    if (view) {
-                        view.setRotation(0);
-                    }
+                    if (view) view.setRotation(0);
 
-                    // 2. Hapus interaksi rotasi (Gestur Dua Jari & Alt+Drag)
+                    // Hapus gestur rotasi
                     map.getInteractions().forEach(function(interaction) {
                         if (interaction instanceof ol.interaction.PinchRotate || 
                             interaction instanceof ol.interaction.DragRotate) {
@@ -171,7 +169,7 @@
                         }
                     });
 
-                    // 3. Hapus atribut qgis2web, OpenLayers, & QGIS
+                    // Hapus atribut
                     map.getControls().forEach(function(control) {
                         if (control instanceof ol.control.Attribution) {
                             map.removeControl(control);
@@ -179,52 +177,55 @@
                     });
                 }
 
-                // Hapus elemen DOM attribution jika tersisa
                 var attributions = document.querySelectorAll('.ol-attribution, .ol-attribution-uncollapsible');
-                attributions.forEach(function(el) {
-                    el.remove();
-                });
+                attributions.forEach(function(el) { el.remove(); });
             }
 
-            // FUNGSI UNTUK MENGHILANGKAN LOADING SCREEN
             function hideLoadingScreen() {
                 var loadingScreen = document.getElementById('loading-screen');
                 if (loadingScreen) {
                     loadingScreen.style.opacity = '0';
-                    setTimeout(function() {
-                        loadingScreen.style.display = 'none';
-                    }, 500);
+                    setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
                 }
             }
 
-            // PERBAIKAN SINKRONISASI KLIK / TAP PADA HP
-            function setupMobileTouchFix() {
+            // MENGGABUNGKAN WAKTU RENDER HIGHLIGHT (KUNING) DAN POPUP DI HP
+            function forceSyncHighlightAndPopup() {
                 if (typeof map !== 'undefined') {
+                    // Paksa saat ada sentuhan singleclick di HP
                     map.on('singleclick', function (evt) {
-                        // Memaksa render ulang canvas peta tepat setelah diklik di HP
-                        requestAnimationFrame(function() {
-                            map.renderSync();
+                        // Cari objek select interaction bawaan qgis2web
+                        var selectInteraction = null;
+                        map.getInteractions().forEach(function(interaction) {
+                            if (interaction instanceof ol.interaction.Select) {
+                                selectInteraction = interaction;
+                            }
                         });
+
+                        // Ambil objek/fitur yang disentuh
+                        var feature = map.forEachFeatureAtPixel(evt.pixel, function (f) { return f; });
+
+                        if (feature && selectInteraction) {
+                            // Kosongkan seleksi lama lalu tambahkan fitur baru secara langsung
+                            selectInteraction.getFeatures().clear();
+                            selectInteraction.getFeatures().push(feature);
+                        }
+
+                        // Paksa mesin OpenLayers merender detik itu juga
+                        map.renderSync();
                     });
                 }
             }
 
-            // Jalankan konfigurasi saat halaman selesai memuat
             window.addEventListener('load', function() {
                 applyMapSettings();
-                setupMobileTouchFix();
+                forceSyncHighlightAndPopup();
 
                 var intervalId = setInterval(applyMapSettings, 50);
-                setTimeout(function() {
-                    clearInterval(intervalId);
-                }, 3000);
+                setTimeout(function() { clearInterval(intervalId); }, 3000);
 
-                // Sembunyikan layar loading
                 if (typeof map !== 'undefined') {
-                    map.once('rendercomplete', function() {
-                        hideLoadingScreen();
-                    });
-                    // Cadangan jika rendercomplete terlambat
+                    map.once('rendercomplete', function() { hideLoadingScreen(); });
                     setTimeout(hideLoadingScreen, 2000);
                 } else {
                     hideLoadingScreen();

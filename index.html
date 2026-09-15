@@ -153,7 +153,7 @@
         <script src="./resources/Autolinker.min.js"></script>
         <script src="./resources/qgis2web.js"></script>        
 
-        <!-- SCRIPT KHUSUS: Mengunci Rotasi, Menghapus Atribut, & Mengelola Loading -->
+        <!-- SCRIPT KHUSUS: Kunci Rotasi, Hapus Atribut, Loading, & PERBAIKAN KLIK HP -->
         <script>
             function applyMapSettings() {
                 if (typeof map !== 'undefined') {
@@ -197,9 +197,23 @@
                 }
             }
 
+            // PERBAIKAN SINKRONISASI KLIK / TAP PADA HP
+            function setupMobileTouchFix() {
+                if (typeof map !== 'undefined') {
+                    map.on('singleclick', function (evt) {
+                        // Memaksa render ulang canvas peta tepat setelah diklik di HP
+                        requestAnimationFrame(function() {
+                            map.renderSync();
+                        });
+                    });
+                }
+            }
+
             // Jalankan konfigurasi saat halaman selesai memuat
             window.addEventListener('load', function() {
                 applyMapSettings();
+                setupMobileTouchFix();
+
                 var intervalId = setInterval(applyMapSettings, 50);
                 setTimeout(function() {
                     clearInterval(intervalId);

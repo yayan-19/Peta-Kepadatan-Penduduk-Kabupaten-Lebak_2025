@@ -38,7 +38,7 @@
             padding: 2px !important;
         } 
 
-        /* HAPUS DAN SEMBUNYIKAN ELEMEN ATTRIBUTION (qgis2web, OpenLayers, QGIS) */
+        /* HAPUS ELEMEN ATTRIBUTION (qgis2web, OpenLayers, QGIS) */
         .ol-attribution,
         .ol-attribution-uncollapsible,
         .ol-attribution button,
@@ -69,12 +69,50 @@
             z-index: 1000;
         }
 
-        /* Menyesuaikan Tinggi Peta Agar Layer Tidak Tertutup Running Text */
+        /* Menyesuaikan Tinggi Peta */
         #map {
             width: 100%;
             height: calc(100% - 35px);
             padding: 0;
             margin: 0;
+        }
+
+        /* STYLE TAMPILAN LOADING SCREEN */
+        #loading-screen {
+            position: fixed;
+            top: 35px; /* Tepat di bawah running text */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 35px);
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ff0000; /* Warna Merah */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333333;
         }
         </style>
         <title>Peta Kepadatan Penduduk Kabupaten Lebak Tahun 2025</title>
@@ -85,6 +123,12 @@
             <marquee behavior="scroll" direction="left" scrollamount="6">
                 Peta Kepadatan Penduduk Kabupaten Lebak Tahun 2025
             </marquee>
+        </div>
+
+        <!-- Tampilan Loading -->
+        <div id="loading-screen">
+            <div class="spinner"></div>
+            <div class="loading-text">Memuat Peta Kepadatan Penduduk...</div>
         </div>
 
         <!-- Element Peta -->
@@ -109,17 +153,17 @@
         <script src="./resources/Autolinker.min.js"></script>
         <script src="./resources/qgis2web.js"></script>        
 
-        <!-- SCRIPT KHUSUS: Mengunci Rotasi Peta & Menghapus Atribut -->
+        <!-- SCRIPT KHUSUS: Mengunci Rotasi, Menghapus Atribut, & Mengelola Loading -->
         <script>
             function applyMapSettings() {
                 if (typeof map !== 'undefined') {
-                    // 1. Kunci agar peta tidak bisa diputar (enableRotation: false)
+                    // 1. Kunci agar peta tidak bisa diputar (Selalu mengarah ke Utara)
                     var view = map.getView();
                     if (view) {
-                        view.setRotation(0); // Setel rotasi kembali ke 0 (Utara ke Atas)
+                        view.setRotation(0);
                     }
 
-                    // 2. Hapus interaksi rotasi (Alt + Drag / Gestur Dua Jari)
+                    // 2. Hapus interaksi rotasi (Gestur Dua Jari & Alt+Drag)
                     map.getInteractions().forEach(function(interaction) {
                         if (interaction instanceof ol.interaction.PinchRotate || 
                             interaction instanceof ol.interaction.DragRotate) {
@@ -127,7 +171,7 @@
                         }
                     });
 
-                    // 3. Hapus kontrol attribution (qgis2web, OpenLayers, QGIS)
+                    // 3. Hapus atribut qgis2web, OpenLayers, & QGIS
                     map.getControls().forEach(function(control) {
                         if (control instanceof ol.control.Attribution) {
                             map.removeControl(control);
@@ -135,20 +179,42 @@
                     });
                 }
 
-                // Hapus elemen DOM attribution fisik jika masih tersisa
+                // Hapus elemen DOM attribution jika tersisa
                 var attributions = document.querySelectorAll('.ol-attribution, .ol-attribution-uncollapsible');
                 attributions.forEach(function(el) {
                     el.remove();
                 });
             }
 
-            // Jalankan saat halaman siap
+            // FUNGSI UNTUK MENGHILANGKAN LOADING SCREEN
+            function hideLoadingScreen() {
+                var loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(function() {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }
+            }
+
+            // Jalankan konfigurasi saat halaman selesai memuat
             window.addEventListener('load', function() {
                 applyMapSettings();
                 var intervalId = setInterval(applyMapSettings, 50);
                 setTimeout(function() {
                     clearInterval(intervalId);
                 }, 3000);
+
+                // Sembunyikan layar loading
+                if (typeof map !== 'undefined') {
+                    map.once('rendercomplete', function() {
+                        hideLoadingScreen();
+                    });
+                    // Cadangan jika rendercomplete terlambat
+                    setTimeout(hideLoadingScreen, 2000);
+                } else {
+                    hideLoadingScreen();
+                }
             });
         </script>
     </body>
